@@ -28,8 +28,8 @@ initializeDBAndServer();
 
 const convertMovieNamePascalCase = (dbObject) => {
   return {
-    stateId: dbObject.status_id,
-    statusName: dbObject.status_name,
+    stateId: dbObject.state_id,
+    statusName: dbObject.state_name,
     population: dbObject.population,
   };
 };

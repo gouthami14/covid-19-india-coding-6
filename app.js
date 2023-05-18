@@ -29,25 +29,25 @@ initializeDBAndServer();
 const convertMovieNamePascalCase = (dbObject) => {
   return {
     stateId: dbObject.state_id,
-    statusName: dbObject.state_name,
+    stateName: dbObject.state_name,
     population: dbObject.population,
   };
 };
 
-//list of states
+//1 list of states
 app.get("/states/", async (request, response) => {
-  const getAllStatesQuery = `
+  const getAllStateQuery = `
     SELECT
     *
     FROM
      state;`;
-  const statesArray = await db.all(getAllStatesQuery);
+  const statesArray = await db.all(getAllStateQuery);
   response.send(
     statesArray.map((stateObject) => convertMovieNamePascalCase(stateObject))
   );
 });
 
-//state based on stateId
+//2 state based on stateId
 
 app.get("/states/:stateId/", async (request, response) => {
   const { stateId } = request.params;
@@ -62,7 +62,7 @@ app.get("/states/:stateId/", async (request, response) => {
   response.send(convertMovieNamePascalCase(state));
 });
 
-//create a table
+//3 create a table
 app.post("/districts/", async (request, response) => {
   const districtDetails = request.body;
   const {
@@ -75,19 +75,33 @@ app.post("/districts/", async (request, response) => {
   } = districtDetails;
   const addDistrictQuery = `
     INSERT INTO
-     district
+      district (district_name,state_id,cases,cured,active,deaths)
     VALUES
-    ('${districtName}',
+    (
+     '${districtName}',
     ${stateId},
     ${cases},
     ${cured},
     ${active},
     ${deaths});`;
+
   const dbResponse = await db.run(addDistrictQuery);
   response.send("District Successfully Added");
 });
 
-//return district based on districtId
+const convertDistrictsPascalCase = (dbObject) => {
+  return {
+    districtId: dbObject.district_id,
+    districtName: dbObject.district_name,
+    stateId: dbObject.state_id,
+    cases: dbObject.cases,
+    cured: dbObject.cured,
+    active: dbObject.active,
+    deaths: dbObject.deaths,
+  };
+};
+
+//4 return district based on districtId
 app.get("/districts/:districtId/", async (request, response) => {
   const { districtId } = request.params;
   const getDistrictQuery = `
@@ -98,10 +112,10 @@ app.get("/districts/:districtId/", async (request, response) => {
     WHERE
      district_id = ${districtId};`;
   const district = await db.get(getDistrictQuery);
-  response.send(convertMovieNamePascalCase(district));
+  response.send(convertDistrictsPascalCase(district));
 });
 
-//Delete a district from table
+//5 Delete a district from table
 app.delete("/districts/:districtId/", async (request, response) => {
   const { districtId } = request.params;
   const deleteDistrictQuery = `
@@ -113,7 +127,7 @@ app.delete("/districts/:districtId/", async (request, response) => {
   response.send("District Removed");
 });
 
-//Updates the details of a specific district
+//6 Updates the details of a specific district
 app.put("/districts/:districtId/", async (request, response) => {
   const { districtId } = request.params;
   const districtDetails = request.body;
@@ -141,7 +155,7 @@ app.put("/districts/:districtId/", async (request, response) => {
   response.send("District Details Updated");
 });
 
-//Returns the statistics of total cases, cured, active, deaths of a specific state based on state ID
+//7 Returns the statistics of total cases, cured, active, deaths of a specific state based on state ID
 app.get("/states/:stateId/stats/", async (request, response) => {
   const { stateId } = request.params;
   const getDistrictQuery = `
@@ -158,7 +172,7 @@ app.get("/states/:stateId/stats/", async (request, response) => {
   response.send(district);
 });
 
-//Returns an object containing the state name of a district based on the district ID
+//8 Returns an object containing the state name of a district based on the district ID
 app.get("/states/:stateId/stats/", async (request, response) => {
   const { districtId } = request.params;
   const getDistrictQuery = `
